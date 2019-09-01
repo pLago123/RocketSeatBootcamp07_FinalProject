@@ -35,6 +35,7 @@ routes.get('/hosting/:id', HostController.show);
 
 routes.get('/subscriptions', SubscriptionController.index);
 routes.post('/meetups/:meetupId/subscriptions', SubscriptionController.store);
+routes.delete('/subscriptions/:id', SubscriptionController.delete);
 
 routes.get('/notifications', NotificationController.index);
 routes.put('/notifications/:id', NotificationController.update);

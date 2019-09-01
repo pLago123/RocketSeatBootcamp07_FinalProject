@@ -5,6 +5,7 @@ import { isBefore, startOfDay, endOfDay, parseISO, subHours } from 'date-fns';
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
 import User from '../models/User';
+import File from '../models/File';
 
 import Notification from '../schemas/Notification';
 
@@ -28,7 +29,7 @@ class MeetupController {
 
     const meetups = await Meetup.findAll({
       where,
-      include: [{ model: User, attributes: ['id'] }],
+      include: [{ model: User, attributes: ['name'] }, { model: File }],
       limit: 10,
       offset: 10 * (page - 1),
     });

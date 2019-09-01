@@ -3,6 +3,7 @@ import { Op } from 'sequelize';
 
 import Subscription from '../models/Subscription';
 import Meetup from '../models/Meetup';
+import File from '../models/File';
 import User from '../models/User';
 
 import SubscriptionMail from '../jobs/SubscriptionMail';
@@ -26,7 +27,19 @@ class SubscriptionController {
       order: [[Meetup, 'date']],
     });
 
-    return res.json(list);
+    const data = list.map(async item => {
+      const { id } = item;
+      const { title, date, location } = item.Meetup;
+      const file = await File.findByPk(item.Meetup.file_id);
+      const user = await User.findByPk(item.Meetup.user_id);
+
+      return { id, title, location, date, File: file, User: user };
+    });
+
+    const payload = await Promise.all(data);
+
+    return res.json(payload);
+    // return res.json(list);
   }
 
   async store(req, res) {
@@ -75,6 +88,21 @@ class SubscriptionController {
     await Queue.add(SubscriptionMail.key, { meetup, user });
 
     return res.json(enroll);
+  }
+
+  async delete(req, res) {
+    // Check if user is logged in.
+    const user = await User.findByPk(req.userId);
+
+    if (req.userId !== user.id) {
+      return res.status(400).json({ error: 'Invalid credentials.' });
+    }
+
+    const subscription = await Subscription.findByPk(req.params.id);
+
+    await subscription.destroy();
+
+    return res.send();
   }
 }
 
